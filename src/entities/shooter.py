@@ -7,14 +7,22 @@ class Shooter(Stalker):
         super().__init__(game, x, y)
         self.image.fill((0, 255, 0))
 
+        self.hp = 1
+
         self.speed = 100
         self.detection_radius = 300
 
-        self.shoot_range = 250
+        self.shoot_range = 75
         self.shoot_cooldown = 3.0
         self.shoot_timer = 0
 
-        self.path_recalc_cooldown = 4.5
+        self.path_recalc_cooldown = 3.5
+
+    def take_damage(self, damage):
+        self.hp -= damage
+        if self.hp <= 0:
+            self.kill()
+            self.game.enemies.remove(self)
 
     def update(self):
         self.path_recalc_timer -= self.game.dt
@@ -60,5 +68,6 @@ class Shooter(Stalker):
             self.rect.centerx,
             self.rect.centery,
             dx,
-            dy
+            dy,
+            300
         )

@@ -16,10 +16,18 @@ class Turret(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-        self.shoot_delay = 1.0
+        self.hp = 1
+
+        self.shoot_delay = 0.5
         self.shoot_timer = 0
         self.detection_radius = 200
         self.z = 1
+
+    def take_damage(self, damage):
+        self.hp -= damage
+        if self.hp <= 0:
+            self.kill()
+            self.game.enemies.remove(self)
 
     def can_see_player(self):
         dx = self.game.player.rect.centerx - self.rect.centerx
@@ -50,12 +58,12 @@ class Turret(pygame.sprite.Sprite):
         return True
 
     def update(self):
-        self.shoot_timer -= self.game.dt
+        time_scale = 0.25 if self.game.player.bullet_time_active else 1.0
+        self.shoot_timer -= self.game.dt * time_scale
 
         if self.can_see_player() and self.shoot_timer <= 0:
             self.shoot()
             self.shoot_timer = self.shoot_delay
-
     def shoot(self):
         dx = self.game.player.rect.centerx - self.rect.centerx
         dy = self.game.player.rect.centery - self.rect.centery

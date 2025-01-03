@@ -14,6 +14,7 @@ from src.entities.shooter import Shooter
 
 class Game:
     def __init__(self):
+        self.state = "START_MENU"
         self.initialize_pygame()
         self.initialize_game_variables()
         self.load_images()
@@ -26,11 +27,15 @@ class Game:
         self.font = pygame.font.SysFont(None, 30)
         pygame.display.set_caption("Tilemap Game")
         self.clock = pygame.time.Clock()
+        self.title_font = pygame.font.SysFont(None, 64)
+        self.menu_font = pygame.font.SysFont(None, 36)
 
     def initialize_game_variables(self):
         self.all_sprites_group = pygame.sprite.Group()
         self.obstacle_group = pygame.sprite.Group()
         self.projectiles_group = pygame.sprite.Group()
+        self.enemy_group = pygame.sprite.Group()
+
         self.player = None
         self.camera = None
         self.enemies = []
@@ -99,18 +104,24 @@ class Game:
     def place_enemies(self):
         self.enemies.clear()
         for room in self.room_objs[1:]:
-            self.add_enemy_to_room(room)
+            self.add_shooter_to_room(room)
             self.add_turret_to_room(room)
+        self.add_stalker_to_room(self.room_objs[-1])
 
-    def add_enemy_to_room(self, room):
+    def add_shooter_to_room(self, room):
         random_x = random.randint(room.x + 1, room.x + room.width - 2)
         random_y = random.randint(room.y + 1, room.y + room.height - 2)
         if self.map_data[random_y][random_x] == FLOOR:
             self.enemies.append(Shooter(self, random_x, random_y))
 
+    def add_stalker_to_room(self, room):
+        random_x = random.randint(room.x + 1, room.x + room.width - 2)
+        random_y = random.randint(room.y + 1, room.y + room.height - 2)
+        if self.map_data[random_y][random_x] == FLOOR:
+            self.enemies.append(Stalker(self, random_x, random_y))
+
     def add_turret_to_room(self, room):
         num_turrets = (room.width * room.height) // 250
-
         for _ in range(num_turrets):
             turret_x = random.randint(room.x + 1, room.x + room.width - 2)
             turret_y = random.randint(room.y + 1, room.y + room.height - 2)
@@ -154,10 +165,24 @@ class Game:
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_sprites()
-        self.draw_bsp_chunks(self.root_room)
+        #self.draw_bsp_chunks(self.root_room)
         self.draw_fps()
+        self.draw_bullet_time_status()
         pygame.display.flip()
 
+    def draw_bullet_time_status(self):
+        if self.player.bullet_time_active:
+            text = f"BULLET TIME: {self.player.bullet_time_timer:.1f}"
+            color = (0, 255, 255)
+        elif self.player.bullet_time_cooldown_timer > 0:
+            text = f"BULLET TIME COOLDOWN: {self.player.bullet_time_cooldown_timer:.1f}"
+            color = (255, 165, 0)
+        else:
+            text = "BULLET TIME READY"
+            color = (0, 255, 0)
+
+        status_text = self.font.render(text, True, color)
+        self.screen.blit(status_text, (10, 40))
     def draw_sprites(self):
         sorted_sprites = sorted(
             self.all_sprites_group,
@@ -210,7 +235,7 @@ class Game:
     def handle_event(self, event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             self.playing = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             self.create_map(seed=random.randint(0, 999999999))
         elif event.type == pygame.MOUSEWHEEL:
             self.camera.adjust_zoom(event.y * 0.5)

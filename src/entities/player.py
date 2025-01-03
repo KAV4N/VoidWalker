@@ -1,5 +1,6 @@
 import pygame
 from src.config import TILE_SIZE
+from src.entities.weapons.sword import Sword
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -15,11 +16,42 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
+        self.bullet_time_active = False
+        self.bullet_time_duration = 5.0
+        self.bullet_time_timer = 0
+        self.bullet_time_cooldown = 5.0
+        self.bullet_time_cooldown_timer = 0
+
+        self.weapon = Sword(self)
+        self.hp = 10
+
 
         self.vx = 0
         self.vy = 0
-        self.speed = 300
+        self.speed = 200
         self.z = 1
+
+    def handle_damage(self, damage):
+        self.hp -= damage
+
+        if self.hp <= 0:
+            self.kill()
+
+
+    def update_bullet_time(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LSHIFT] and self.bullet_time_cooldown_timer <= 0:
+            self.bullet_time_active = True
+            self.bullet_time_timer = self.bullet_time_duration
+
+        if self.bullet_time_active:
+            self.bullet_time_timer -= self.game.dt
+            if self.bullet_time_timer <= 0:
+                self.bullet_time_active = False
+                self.bullet_time_cooldown_timer = self.bullet_time_cooldown
+
+        if self.bullet_time_cooldown_timer > 0:
+            self.bullet_time_cooldown_timer -= self.game.dt
 
     def get_input(self):
         self.vx, self.vy = 0, 0
@@ -33,6 +65,9 @@ class Player(pygame.sprite.Sprite):
             self.vy = -self.speed
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
             self.vy = self.speed
+        if keys[pygame.K_SPACE]:
+            self.weapon.start_attack()
+
 
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
@@ -58,10 +93,12 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.get_input()
+        self.update_bullet_time()
         self.x += self.vx * self.game.dt
         self.rect.x = self.x
         self.collide_with_walls('x')
-
         self.y += self.vy * self.game.dt
         self.rect.y = self.y
         self.collide_with_walls('y')
+
+        self.weapon.update()
