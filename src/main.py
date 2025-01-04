@@ -1,7 +1,6 @@
 import pygame
 import random
 from dungeon_generator import DungeonGenerator
-from room import Room
 from entities.player import Player
 from entities.stalker import Stalker
 from camera import Camera
@@ -10,6 +9,9 @@ from entities.buildings.wall import Wall
 from entities.buildings.floor import Floor
 from config import *
 from src.entities.shooter import Shooter
+from src.ui.attack_display import AttackRechargeDisplay
+from src.ui.bullet_time_display import BulletTimeDisplay
+from src.ui.health_display import HealthDisplay
 
 
 class Game:
@@ -17,9 +19,20 @@ class Game:
         self.state = "START_MENU"
         self.initialize_pygame()
         self.initialize_game_variables()
+
+        self.images = {}
+
         self.load_images()
         self.create_initial_map()
+        self.level = 1
+        self.game_over = False
         self.new()
+        self.initialize_ui()
+
+    def initialize_ui(self):
+        self.health_display = HealthDisplay(self.player)
+        self.recharge_display = AttackRechargeDisplay(self.player)
+        self.bullet_time_display = BulletTimeDisplay(self.player)
 
     def initialize_pygame(self):
         pygame.init()
@@ -39,9 +52,10 @@ class Game:
         self.player = None
         self.camera = None
         self.enemies = []
+        self.stalker_count = 1
         self.playing = False
         self.dt = 0
-        self.images = {}
+
         self.map_data = []
         self.room_objs = []
         self.root_room = None
@@ -76,11 +90,10 @@ class Game:
         )
         self.map_data, self.room_objs, self.root_room, self.current_seed = generator.generate_dungeon()
         self.populate_map_with_tiles()
-        if self.player:
-            self.position_player_in_map()
-            self.place_enemies()
+
 
     def cleanup_sprites(self):
+        self.enemies.clear()
         for sprite in self.all_sprites_group:
             if sprite != self.player:
                 sprite.kill()
@@ -103,6 +116,7 @@ class Game:
 
     def place_enemies(self):
         self.enemies.clear()
+        print(456)
         for room in self.room_objs[1:]:
             self.add_shooter_to_room(room)
             self.add_turret_to_room(room)
@@ -133,6 +147,7 @@ class Game:
             self.initialize_player()
         if not self.camera:
             self.camera = Camera(MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE)
+            self.place_enemies()
 
     def initialize_player(self):
         for room in self.room_objs:
@@ -141,13 +156,7 @@ class Game:
                 self.player = Player(self, center_x, center_y)
                 break
 
-    def run(self):
-        self.playing = True
-        while self.playing:
-            self.dt = self.clock.tick(FPS) / 1000
-            self.events()
-            self.update()
-            self.draw()
+
 
     def quit(self):
         pygame.quit()
@@ -162,27 +171,19 @@ class Game:
                 rect.bottom >= 0 and rect.top <= WINDOW_HEIGHT
         )
 
+
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_sprites()
-        #self.draw_bsp_chunks(self.root_room)
+        self.draw_ui()
         self.draw_fps()
-        self.draw_bullet_time_status()
         pygame.display.flip()
 
-    def draw_bullet_time_status(self):
-        if self.player.bullet_time_active:
-            text = f"BULLET TIME: {self.player.bullet_time_timer:.1f}"
-            color = (0, 255, 255)
-        elif self.player.bullet_time_cooldown_timer > 0:
-            text = f"BULLET TIME COOLDOWN: {self.player.bullet_time_cooldown_timer:.1f}"
-            color = (255, 165, 0)
-        else:
-            text = "BULLET TIME READY"
-            color = (0, 255, 0)
+    def draw_ui(self):
+        self.health_display.draw(self.screen)
+        self.recharge_display.draw(self.screen)
+        self.bullet_time_display.draw(self.screen)
 
-        status_text = self.font.render(text, True, color)
-        self.screen.blit(status_text, (10, 40))
     def draw_sprites(self):
         sorted_sprites = sorted(
             self.all_sprites_group,
@@ -201,8 +202,7 @@ class Game:
             )
             self.screen.blit(scaled_image, screen_rect)
 
-
-
+    #----------------------------------- TEST  DRAWS ----------------------------------------------------------
     def draw_fps(self):
         fps_text = self.font.render(f"FPS: {int(self.clock.get_fps())}", True, WHITE)
         self.screen.blit(fps_text, (10, 10))
@@ -228,6 +228,8 @@ class Game:
             1
         )
 
+    # ----------------------------------- TEST  DRAWS ----------------------------------------------------------
+
     def events(self):
         for event in pygame.event.get():
             self.handle_event(event)
@@ -240,10 +242,96 @@ class Game:
         elif event.type == pygame.MOUSEWHEEL:
             self.camera.adjust_zoom(event.y * 0.5)
 
+    def run(self):
+        while not self.game_over:
+            if self.state == "START_MENU":
+                self.run_start_menu()
+            elif self.state == "PLAYING":
+                self.run_game_loop()
+            elif self.state == "GAME_OVER":
+                self.run_game_over()
+
+    def run_start_menu(self):
+        waiting = True
+        while waiting and not self.game_over:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        waiting = False
+                        self.state = "PLAYING"
+
+            self.screen.fill(BACKGROUND_COLOR)
+            title = self.title_font.render("DUNGEON ESCAPE", True, WHITE)
+            start = self.menu_font.render("Press ENTER to Start", True, WHITE)
+            self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 3))
+            self.screen.blit(start, (WINDOW_WIDTH // 2 - start.get_width() // 2, WINDOW_HEIGHT // 2))
+            pygame.display.flip()
+            self.clock.tick(FPS)
+
+    def run_game_loop(self):
+        self.playing = True
+        while self.playing and not self.game_over:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+            self.dt = self.clock.tick(FPS) / 1000
+            self.events()
+            self.update()
+            self.check_level_completion()
+            self.check_player_status()
+            self.draw()
+
+    def check_level_completion(self):
+        if len(self.enemies) <= self.stalker_count:
+            self.level += 1
+            self.create_map(seed=random.randint(0, 999999999))
+            self.position_player_in_map()
+            self.place_enemies()
+
+    def check_player_status(self):
+        if not self.player.alive():
+            self.playing = False
+            self.state = "GAME_OVER"
+
+    def run_game_over(self):
+        while not self.game_over:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        self.reset_game()
+                        break
+                    elif event.key == pygame.K_ESCAPE:
+                        self.game_over = True
+            else:
+                self.screen.fill(BACKGROUND_COLOR)
+                game_over = self.title_font.render("GAME OVER", True, WHITE)
+                score = self.menu_font.render(f"Levels Completed: {self.level - 1}", True, WHITE)
+                restart = self.menu_font.render("Press R to Restart or ESC to Quit", True, WHITE)
+
+                self.screen.blit(game_over, (WINDOW_WIDTH // 2 - game_over.get_width() // 2, WINDOW_HEIGHT // 3))
+                self.screen.blit(score, (WINDOW_WIDTH // 2 - score.get_width() // 2, WINDOW_HEIGHT // 2))
+                self.screen.blit(restart, (WINDOW_WIDTH // 2 - restart.get_width() // 2, WINDOW_HEIGHT * 2 // 3))
+                pygame.display.flip()
+                self.clock.tick(FPS)
+
+    def reset_game(self):
+        self.level = 1
+        self.state = "PLAYING"
+        self.initialize_game_variables()
+        self.create_initial_map()
+        self.new()
+        self.health_display.set_player(self.player)
+        self.recharge_display.set_player(self.player)
+        self.bullet_time_display.set_player(self.player)
+
+
 
 
 if __name__ == "__main__":
     game = Game()
-    game.new()
     game.run()
     pygame.quit()

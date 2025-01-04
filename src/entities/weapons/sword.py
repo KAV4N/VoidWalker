@@ -28,7 +28,7 @@ class Sword:
 
     def check_hits(self):
         self.attack_rect.center = self.player.rect.center
-
+        print(len(self.game.enemies))
         for enemy in self.game.enemies:
             if (
                 hasattr(enemy, 'hp') and

@@ -22,10 +22,12 @@ class Stalker(pygame.sprite.Sprite):
         self.y = y * TILE_SIZE
         self.rect.x = self.x
         self.rect.y = self.y
+
         self.z = 1
 
     def _init_movement_params(self):
-        self.speed = 125
+        self.directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+        self.speed = 150
         self.detection_radius = 300
 
     def _init_patrol_params(self):
@@ -88,14 +90,13 @@ class Stalker(pygame.sprite.Sprite):
         frontier = [(0, start)]
         came_from = {start: None}
         cost_so_far = {start: 0}
-        directions = self._get_valid_directions()
 
         while frontier:
             _, current = heapq.heappop(frontier)
             if current == goal:
                 break
 
-            for direction in directions:
+            for direction in self.directions:
                 neighbor = self._get_neighbor(current, direction)
                 if not self._is_valid_position(neighbor):
                     continue
@@ -106,9 +107,6 @@ class Stalker(pygame.sprite.Sprite):
 
         return self._reconstruct_path(start, goal, came_from)
 
-    def _get_valid_directions(self):
-        return [(dx, dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1]
-                if not (dx == 0 and dy == 0)]
 
     def _get_neighbor(self, current, direction):
         return (current[0] + direction[0], current[1] + direction[1])

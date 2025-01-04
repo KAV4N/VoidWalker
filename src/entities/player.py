@@ -1,5 +1,5 @@
 import pygame
-from src.config import TILE_SIZE
+from src.config import *
 from src.entities.weapons.sword import Sword
 
 class Player(pygame.sprite.Sprite):
@@ -23,12 +23,12 @@ class Player(pygame.sprite.Sprite):
         self.bullet_time_cooldown_timer = 0
 
         self.weapon = Sword(self)
-        self.hp = 10
+        self.hp = 100
 
 
         self.vx = 0
         self.vy = 0
-        self.speed = 200
+        self.speed = 250
         self.z = 1
 
     def handle_damage(self, damage):
@@ -66,6 +66,7 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
             self.vy = self.speed
         if keys[pygame.K_SPACE]:
+            print("attack")
             self.weapon.start_attack()
 
 
@@ -73,32 +74,48 @@ class Player(pygame.sprite.Sprite):
             self.vx *= 0.7071
             self.vy *= 0.7071
 
-    def collide_with_walls(self, dir):
-        for wall in self.game.obstacle_group:
-            if wall.rect.colliderect(self.rect):
-                if dir == 'x':
-                    if self.vx > 0:
-                        self.rect.right = wall.rect.left
-                    elif self.vx < 0:
-                        self.rect.left = wall.rect.right
-                    self.rect.centerx = self.rect.centerx
-                    self.x = self.rect.x
-                elif dir == 'y':
-                    if self.vy > 0:
-                        self.rect.bottom = wall.rect.top
-                    elif self.vy < 0:
-                        self.rect.top = wall.rect.bottom
-                    self.rect.centery = self.rect.centery
-                    self.y = self.rect.y
+    def check_collision(self):
+        tile_x1 = self.rect.left // TILE_SIZE
+        tile_x2 = self.rect.right // TILE_SIZE
+        tile_y1 = self.rect.top // TILE_SIZE
+        tile_y2 = self.rect.bottom // TILE_SIZE
+
+        for y in range(tile_y1, tile_y2 + 1):
+            for x in range(tile_x1, tile_x2 + 1):
+                if (y >= 0 and y < len(self.game.map_data) and
+                        x >= 0 and x < len(self.game.map_data[0])):
+                    if self.game.map_data[y][x] != FLOOR:  # Wall tile
+                        return True
+        return False
+
+    def move(self, dx, dy):
+        self.x += dx
+        self.rect.x = self.x
+        if self.check_collision():
+            if dx > 0:
+                while self.check_collision():
+                    self.x -= 1
+                    self.rect.x = self.x
+            elif dx < 0:
+                while self.check_collision():
+                    self.x += 1
+                    self.rect.x = self.x
+
+        self.y += dy
+        self.rect.y = self.y
+        if self.check_collision():
+            if dy > 0:
+                while self.check_collision():
+                    self.y -= 1
+                    self.rect.y = self.y
+            elif dy < 0:
+                while self.check_collision():
+                    self.y += 1
+                    self.rect.y = self.y
 
     def update(self):
         self.get_input()
         self.update_bullet_time()
-        self.x += self.vx * self.game.dt
-        self.rect.x = self.x
-        self.collide_with_walls('x')
-        self.y += self.vy * self.game.dt
-        self.rect.y = self.y
-        self.collide_with_walls('y')
-
+        self.move(self.vx * self.game.dt, self.vy * self.game.dt)
         self.weapon.update()
+

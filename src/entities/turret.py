@@ -18,7 +18,7 @@ class Turret(pygame.sprite.Sprite):
 
         self.hp = 1
 
-        self.shoot_delay = 0.5
+        self.shoot_delay = 0.35
         self.shoot_timer = 0
         self.detection_radius = 200
         self.z = 1
