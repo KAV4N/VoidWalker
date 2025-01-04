@@ -7,8 +7,7 @@ class Projectile(pygame.sprite.Sprite):
         super().__init__(self.groups)
         self.game = game
 
-        self.image = pygame.Surface((TILE_SIZE // 2, TILE_SIZE // 2))
-        self.image.fill((255, 255, 0))
+        self.image = self.game.images["projectile"]
         self.rect = self.image.get_rect()
 
         self.damage = 1

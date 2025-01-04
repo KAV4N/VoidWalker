@@ -1,14 +1,13 @@
 import pygame
 from src.config import *
-from src.entities.weapons.sword import Sword
+from src.entities.weapons.spell import Spell
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         super().__init__([game.all_sprites_group])
         self.game = game
 
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((255, 0, 0))
+        self.image = self.game.images["player"]
 
         self.rect = self.image.get_rect()
         self.x = x * TILE_SIZE
@@ -22,7 +21,7 @@ class Player(pygame.sprite.Sprite):
         self.bullet_time_cooldown = 5.0
         self.bullet_time_cooldown_timer = 0
 
-        self.weapon = Sword(self)
+        self.weapon = Spell(self)
         self.hp = 100
 
 

@@ -15,8 +15,7 @@ class Stalker(pygame.sprite.Sprite):
 
     def _init_sprite(self, game, x, y):
         self.game = game
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((0, 0, 255))
+        self.image = self.game.images["stalker"]
         self.rect = self.image.get_rect()
         self.x = x * TILE_SIZE
         self.y = y * TILE_SIZE

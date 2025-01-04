@@ -2,7 +2,7 @@ import pygame
 from src.config import TILE_SIZE
 
 
-class Sword:
+class Spell:
     def __init__(self, player):
         self.player = player
         self.game = player.game

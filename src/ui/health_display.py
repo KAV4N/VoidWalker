@@ -4,6 +4,7 @@ from src.config import WINDOW_HEIGHT
 class HealthDisplay:
     def __init__(self, player):
         self.player = player
+
         self.font = pygame.font.SysFont(None, 36)
         self.heart_width = 30
         self.heart_spacing = 5

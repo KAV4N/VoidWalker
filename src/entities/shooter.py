@@ -5,8 +5,10 @@ import math
 class Shooter(Stalker):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
-        self.image.fill((0, 255, 0))
-
+        self.image = self.game.images["shooter"]
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.hp = 1
 
         self.speed = 100

@@ -8,8 +8,7 @@ class Turret(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         super().__init__([game.all_sprites_group])
         self.game = game
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((255, 165, 0))
+        self.image = self.game.images["turret"]
         self.rect = self.image.get_rect()
         self.x = x * TILE_SIZE
         self.y = y * TILE_SIZE
@@ -50,7 +49,7 @@ class Turret(pygame.sprite.Sprite):
             tile_y = int(y / TILE_SIZE)
             if (tile_x < 0 or tile_x >= MAP_WIDTH or
                     tile_y < 0 or tile_y >= MAP_HEIGHT or
-                    self.game.map_data[tile_y][tile_x] == WALL_CENTER):
+                    self.game.map_data[tile_y][tile_x] != FLOOR):
                 return False
             x += step_x
             y += step_y

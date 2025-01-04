@@ -75,6 +75,43 @@ class Game:
             (TILE_SIZE, TILE_SIZE)
         )
 
+        self.images["stalker"] = pygame.transform.scale(
+            pygame.image.load("../frames/big_demon_idle_anim_f0.png").convert_alpha(),
+            (TILE_SIZE*4, TILE_SIZE*4)
+        )
+
+        self.images["shooter"] = pygame.transform.scale(
+            pygame.image.load("../frames/wizzard_m_idle_anim_f0.png").convert_alpha(),
+            (TILE_SIZE, TILE_SIZE*1.5)
+        )
+
+        self.images["turret"] = pygame.transform.scale(
+            pygame.image.load("../frames/necromancer_anim_f0.png").convert_alpha(),
+            (TILE_SIZE, TILE_SIZE*1.5)
+        )
+
+        self.images["projectile"] = pygame.transform.scale(
+            pygame.image.load("../assets/monster_elemental_fire.png").convert_alpha(),
+            (TILE_SIZE//2, TILE_SIZE//2)
+        )
+
+        self.images["player"] = pygame.transform.scale(
+            pygame.image.load("../assets/monster_necromancer.png").convert_alpha(),
+            (TILE_SIZE*1.25, TILE_SIZE*1.25)
+        )
+
+        self.images["sword"] = pygame.transform.scale(
+            pygame.image.load("../frames/weapon_red_gem_sword.png").convert_alpha(),
+            (TILE_SIZE, TILE_SIZE)
+        )
+
+        self.images["heart"] = pygame.transform.scale(
+            pygame.image.load("../assets/heart.png").convert_alpha(),
+            (TILE_SIZE, TILE_SIZE )
+        )
+
+        # todo : add animations
+
     def create_initial_map(self):
         self.create_map(seed=123)
 
@@ -89,6 +126,7 @@ class Game:
             seed=seed
         )
         self.map_data, self.room_objs, self.root_room, self.current_seed = generator.generate_dungeon()
+        print(self.map_data)
         self.populate_map_with_tiles()
 
 
@@ -116,17 +154,20 @@ class Game:
 
     def place_enemies(self):
         self.enemies.clear()
-        print(456)
+
         for room in self.room_objs[1:]:
             self.add_shooter_to_room(room)
             self.add_turret_to_room(room)
+
         self.add_stalker_to_room(self.room_objs[-1])
 
     def add_shooter_to_room(self, room):
-        random_x = random.randint(room.x + 1, room.x + room.width - 2)
-        random_y = random.randint(room.y + 1, room.y + room.height - 2)
-        if self.map_data[random_y][random_x] == FLOOR:
-            self.enemies.append(Shooter(self, random_x, random_y))
+        num_turrets = max((room.width * room.height) // 250, 1)
+        for _ in range(num_turrets):
+            turret_x = random.randint(room.x + 1, room.x + room.width - 2)
+            turret_y = random.randint(room.y + 1, room.y + room.height - 2)
+            if self.map_data[turret_y][turret_x] == FLOOR:
+                self.enemies.append(Shooter(self, turret_x, turret_y))
 
     def add_stalker_to_room(self, room):
         random_x = random.randint(room.x + 1, room.x + room.width - 2)
@@ -135,7 +176,7 @@ class Game:
             self.enemies.append(Stalker(self, random_x, random_y))
 
     def add_turret_to_room(self, room):
-        num_turrets = (room.width * room.height) // 250
+        num_turrets = max((room.width * room.height) // 250, 1)
         for _ in range(num_turrets):
             turret_x = random.randint(room.x + 1, room.x + room.width - 2)
             turret_y = random.randint(room.y + 1, room.y + room.height - 2)
@@ -230,18 +271,6 @@ class Game:
 
     # ----------------------------------- TEST  DRAWS ----------------------------------------------------------
 
-    def events(self):
-        for event in pygame.event.get():
-            self.handle_event(event)
-
-    def handle_event(self, event):
-        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-            self.playing = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-            self.create_map(seed=random.randint(0, 999999999))
-        elif event.type == pygame.MOUSEWHEEL:
-            self.camera.adjust_zoom(event.y * 0.5)
-
     def run(self):
         while not self.game_over:
             if self.state == "START_MENU":
@@ -263,7 +292,7 @@ class Game:
                         self.state = "PLAYING"
 
             self.screen.fill(BACKGROUND_COLOR)
-            title = self.title_font.render("DUNGEON ESCAPE", True, WHITE)
+            title = self.title_font.render("VOIDWALKER", True, WHITE)
             start = self.menu_font.render("Press ENTER to Start", True, WHITE)
             self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 3))
             self.screen.blit(start, (WINDOW_WIDTH // 2 - start.get_width() // 2, WINDOW_HEIGHT // 2))
@@ -274,10 +303,14 @@ class Game:
         self.playing = True
         while self.playing and not self.game_over:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.game_over = True
+                    self.playing = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    self.create_map(seed=random.randint(0, 999999999))
+                elif event.type == pygame.MOUSEWHEEL:
+                    self.camera.adjust_zoom(event.y * 0.5)
             self.dt = self.clock.tick(FPS) / 1000
-            self.events()
             self.update()
             self.check_level_completion()
             self.check_player_status()
@@ -296,13 +329,15 @@ class Game:
             self.state = "GAME_OVER"
 
     def run_game_over(self):
-        while not self.game_over:
+        waiting = True
+        while waiting and not self.game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_over = True
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
                         self.reset_game()
+                        waiting = False
                         break
                     elif event.key == pygame.K_ESCAPE:
                         self.game_over = True
@@ -317,6 +352,7 @@ class Game:
                 self.screen.blit(restart, (WINDOW_WIDTH // 2 - restart.get_width() // 2, WINDOW_HEIGHT * 2 // 3))
                 pygame.display.flip()
                 self.clock.tick(FPS)
+
 
     def reset_game(self):
         self.level = 1
