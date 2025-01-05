@@ -4,11 +4,11 @@ from dungeon_generator import DungeonGenerator
 from entities.player import Player
 from entities.stalker import Stalker
 from camera import Camera
-from entities.turret import Turret
+from entities.wizard import Wizard
 from entities.buildings.wall import Wall
 from entities.buildings.floor import Floor
 from config import *
-from src.entities.shooter import Shooter
+from src.entities.sharpshooter import Sharpshooter
 from src.managers.asset_manager import AssetManager
 from src.managers.sound_manager import SoundManager
 from src.ui.attack_display import AttackRechargeDisplay
@@ -117,7 +117,7 @@ class Game:
             shooter_x = random.randint(room.x + 1, room.x + room.width - 2)
             shooter_y = random.randint(room.y + 1, room.y + room.height - 2)
             if self.map_data[shooter_y][shooter_x] == FLOOR:
-                shooter = Shooter(self, shooter_x, shooter_y)
+                shooter = Sharpshooter(self, shooter_x, shooter_y)
                 self.enemy_group.add(shooter)
 
     def add_stalker_to_room(self, room):
@@ -133,7 +133,7 @@ class Game:
             turret_x = random.randint(room.x + 1, room.x + room.width - 2)
             turret_y = random.randint(room.y + 1, room.y + room.height - 2)
             if self.map_data[turret_y][turret_x] == FLOOR:
-                turret = Turret(self, turret_x, turret_y)
+                turret = Wizard(self, turret_x, turret_y)
                 self.enemy_group.add(turret)
 
     def new(self):
@@ -286,8 +286,8 @@ class Game:
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.game_over = True
                     self.playing = False
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                    self.create_map(seed=random.randint(0, 999999999))
+                # elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                #     self.create_map(seed=random.randint(0, 999999999))
                 elif event.type == pygame.MOUSEWHEEL:
                     self.camera.adjust_zoom(event.y * 0.5)
             self.dt = self.clock.tick(FPS) / 1000

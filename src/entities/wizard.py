@@ -5,7 +5,7 @@ from src.config import *
 from src.entities.base_sprite import BaseSprite
 
 
-class Turret(BaseSprite):
+class Wizard(BaseSprite):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, game.asset_manager.get_image("turret"))
 

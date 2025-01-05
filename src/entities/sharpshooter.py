@@ -2,7 +2,7 @@ from src.entities.stalker import Stalker
 from src.entities.weapons.projectile import Projectile
 import math
 
-class Shooter(Stalker):
+class Sharpshooter(Stalker):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self.image = self.game.asset_manager.get_image("shooter")
