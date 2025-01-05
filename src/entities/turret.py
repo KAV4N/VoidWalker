@@ -2,31 +2,36 @@ import pygame
 import math
 from src.entities.weapons.projectile import Projectile
 from src.config import *
+from src.entities.base_sprite import BaseSprite
 
 
-class Turret(pygame.sprite.Sprite):
+class Turret(BaseSprite):
     def __init__(self, game, x, y):
-        super().__init__([game.all_sprites_group])
-        self.game = game
-        self.image = self.game.images["turret"]
-        self.rect = self.image.get_rect()
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
-        self.rect.x = self.x
-        self.rect.y = self.y
+        super().__init__(game, x, y, game.images["turret"]["default"][0])
 
         self.hp = 1
+        self.z = 1
+
+        self.animation_frames = game.images["turret"]["default"]
+        self.current_frame = 0
+        self.animation_time = 0
+        self.animation_delay = 0.2
 
         self.shoot_delay = 0.35
         self.shoot_timer = 0
         self.detection_radius = 200
-        self.z = 1
+
+    def animate(self, dt):
+        self.animation_time += dt
+        if self.animation_time >= self.animation_delay:
+            self.animation_time = 0
+            self.current_frame = (self.current_frame + 1) % len(self.animation_frames)
+            self.image = self.animation_frames[self.current_frame]
 
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp <= 0:
             self.kill()
-            self.game.enemies.remove(self)
 
     def can_see_player(self):
         dx = self.game.player.rect.centerx - self.rect.centerx
@@ -58,11 +63,15 @@ class Turret(pygame.sprite.Sprite):
 
     def update(self):
         time_scale = 0.25 if self.game.player.bullet_time_active else 1.0
+
+        self.animate(self.game.dt * time_scale)
+
         self.shoot_timer -= self.game.dt * time_scale
 
         if self.can_see_player() and self.shoot_timer <= 0:
             self.shoot()
             self.shoot_timer = self.shoot_delay
+
     def shoot(self):
         dx = self.game.player.rect.centerx - self.rect.centerx
         dy = self.game.player.rect.centery - self.rect.centery
@@ -70,4 +79,5 @@ class Turret(pygame.sprite.Sprite):
         if distance > 0:
             dx = dx / distance
             dy = dy / distance
+            self.game.play_sound("enemy_attack")
             Projectile(self.game, self.rect.centerx, self.rect.centery, dx, dy)

@@ -1,28 +1,16 @@
-import pygame
 import random
 import heapq
 import math
 from src.config import *
+from src.entities.base_sprite import BaseSprite
 
-
-class Stalker(pygame.sprite.Sprite):
+class Stalker(BaseSprite):
     def __init__(self, game, x, y):
-        super().__init__([game.all_sprites_group])
-        self._init_sprite(game, x, y)
+        super().__init__(game, x, y, game.images["stalker"]["default"][0])
+        self.z = 1
         self._init_movement_params()
         self._init_patrol_params()
         self._init_pathfinding_params()
-
-    def _init_sprite(self, game, x, y):
-        self.game = game
-        self.image = self.game.images["stalker"]
-        self.rect = self.image.get_rect()
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
-        self.rect.x = self.x
-        self.rect.y = self.y
-
-        self.z = 1
 
     def _init_movement_params(self):
         self.directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -82,7 +70,6 @@ class Stalker(pygame.sprite.Sprite):
     def find_path(self, target_x, target_y):
         start = (self.rect.centerx // TILE_SIZE, self.rect.centery // TILE_SIZE)
         goal = (target_x // TILE_SIZE, target_y // TILE_SIZE)
-
         return self._a_star_pathfinding(start, goal)
 
     def _a_star_pathfinding(self, start, goal):
@@ -105,7 +92,6 @@ class Stalker(pygame.sprite.Sprite):
                     self._update_path_data(neighbor, new_cost, current, goal, frontier, came_from, cost_so_far)
 
         return self._reconstruct_path(start, goal, came_from)
-
 
     def _get_neighbor(self, current, direction):
         return (current[0] + direction[0], current[1] + direction[1])
