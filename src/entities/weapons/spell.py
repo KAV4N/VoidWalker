@@ -10,18 +10,21 @@ class Spell:
         self.damage = 1
 
         self.particles = []
-        self.particle_lifetime = 0.3
+        self.particle_lifetime = 0.2
         self.particle_count = 12
         self.particle_speed = 200
         self.particle_size = TILE_SIZE // 4
         self.particle_color = PURPLE
         self.glow_radius = TILE_SIZE * 2
 
-        self.attack_rect = pygame.Rect(0, 0, TILE_SIZE * 1.5, TILE_SIZE)
-        self.damaged_enemies = set()
+        self.max_radius = self.particle_speed * self.particle_lifetime
+
+        self.attack_radius = self.max_radius
 
         self.recharge_time = 0.35
         self.recharge_timer = 0
+
+        self.damaged_enemies = set()
 
     def create_particles(self):
         for i in range(self.particle_count):
@@ -89,12 +92,17 @@ class Spell:
             self.recharge_timer = 0
 
     def check_hits(self):
-        self.attack_rect.center = self.player.rect.center
+        center_x = self.player.rect.centerx
+        center_y = self.player.rect.centery
+
         for enemy in self.game.enemy_group:
-            if (
-                    hasattr(enemy, 'hp') and
-                    self.attack_rect.colliderect(enemy.rect) and
-                    enemy not in self.damaged_enemies
-            ):
+            if not hasattr(enemy, 'hp'):
+                continue
+
+            dx = enemy.rect.centerx - center_x
+            dy = enemy.rect.centery - center_y
+            distance = math.sqrt(dx * dx + dy * dy)
+
+            if distance <= self.attack_radius and enemy not in self.damaged_enemies:
                 enemy.take_damage(self.damage)
                 self.damaged_enemies.add(enemy)

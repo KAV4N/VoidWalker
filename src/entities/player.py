@@ -17,7 +17,7 @@ class Player(BaseSprite):
         self.bullet_time_cooldown_timer = 0
 
         self.weapon = Spell(self)
-        self.max_hp = 30
+        self.max_hp = 20
         self.hp = self.max_hp
         self.z = 2
 
