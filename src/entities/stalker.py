@@ -4,13 +4,15 @@ import math
 from src.config import *
 from src.entities.base_sprite import BaseSprite
 
+
 class Stalker(BaseSprite):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, game.images["stalker"]["default"][0])
+        super().__init__(game, x, y, game.asset_manager.get_image("stalker"))
         self.z = 1
         self._init_movement_params()
         self._init_patrol_params()
         self._init_pathfinding_params()
+        self._init_combat_params()
 
     def _init_movement_params(self):
         self.directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -27,6 +29,11 @@ class Stalker(BaseSprite):
         self.path = []
         self.path_recalc_cooldown = 0.5
         self.path_recalc_timer = self.path_recalc_cooldown
+
+    def _init_combat_params(self):
+        self.damage = 5
+        self.damage_cooldown = 1.0
+        self.damage_timer = 0
 
     def find_random_patrol_point(self):
         while True:
@@ -66,6 +73,13 @@ class Stalker(BaseSprite):
         dx = target_x - self.rect.centerx
         dy = target_y - self.rect.centery
         return math.sqrt(dx * dx + dy * dy)
+
+    def check_player_collision(self):
+        if self.rect.colliderect(self.game.player.rect):
+            if self.damage_timer <= 0:
+                self.game.player.handle_damage(self.damage)
+                self.game.sound_manager.play("enemy_attack")
+                self.damage_timer = self.damage_cooldown
 
     def find_path(self, target_x, target_y):
         start = (self.rect.centerx // TILE_SIZE, self.rect.centery // TILE_SIZE)
@@ -151,7 +165,7 @@ class Stalker(BaseSprite):
         self.rect.y += movement_y
 
     def update(self):
-        self._update_path_timer()
+        self._update_timers()
         dist_to_player = self.distance_to(
             self.game.player.rect.centerx,
             self.game.player.rect.centery
@@ -162,8 +176,12 @@ class Stalker(BaseSprite):
         else:
             self._patrol_area()
 
-    def _update_path_timer(self):
+        self.check_player_collision()
+
+    def _update_timers(self):
         self.path_recalc_timer -= self.game.dt
+        if self.damage_timer > 0:
+            self.damage_timer -= self.game.dt
 
     def _is_player_detected(self, distance):
         return distance <= self.detection_radius

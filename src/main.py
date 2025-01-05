@@ -9,6 +9,8 @@ from entities.buildings.wall import Wall
 from entities.buildings.floor import Floor
 from config import *
 from src.entities.shooter import Shooter
+from src.managers.asset_manager import AssetManager
+from src.managers.sound_manager import SoundManager
 from src.ui.attack_display import AttackRechargeDisplay
 from src.ui.bullet_time_display import BulletTimeDisplay
 from src.ui.health_display import HealthDisplay
@@ -20,11 +22,9 @@ class Game:
         self.initialize_pygame()
         self.initialize_game_variables()
 
-        self.images = {}
-        self.sounds = {}
+        self.asset_manager = AssetManager()
+        self.sound_manager = SoundManager()
 
-        self.load_images()
-        self.load_sounds()
         self.create_initial_map()
         self.level = 1
         self.game_over = False
@@ -48,8 +48,12 @@ class Game:
         self.root_room = None
         self.current_seed = -1
 
+        self.damage_effect_active = False
+        self.damage_effect_duration = 0.2
+        self.damage_effect_timer = 0
+
     def initialize_ui(self):
-        self.health_display = HealthDisplay(self.player, self.images["heart"]["default"][0])
+        self.health_display = HealthDisplay(self.player, self.asset_manager.get_image("heart"))
         self.recharge_display = AttackRechargeDisplay(self.player)
         self.bullet_time_display = BulletTimeDisplay(self.player)
 
@@ -62,139 +66,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.title_font = pygame.font.SysFont(None, 64)
         self.menu_font = pygame.font.SysFont(None, 36)
-
-    def load_sounds(self):
-        self.sounds["menu_music"] = pygame.mixer.Sound("../assets/sound/menu.mp3")
-        self.sounds["ingame_music"] = pygame.mixer.Sound("../assets/sound/ingame.mp3")
-        self.sounds["monolog"] = pygame.mixer.Sound("../assets/sound/monolog.mp3")
-        self.sounds["ambient"] = pygame.mixer.Sound("../assets/sound/demon_voices.mp3")
-        self.sounds["attack"] = pygame.mixer.Sound("../assets/sound/attack_player.mp3")
-        self.sounds["enemy_attack"] = pygame.mixer.Sound("../assets/sound/enemy_attack.mp3")
-        self.sounds["bullet_time"] = pygame.mixer.Sound("../assets/sound/bullet_time.mp3")
-
-        self.sounds["ingame_music"].set_volume(0.7)
-        self.sounds["ambient"].set_volume(0.8)
-        self.sounds["attack"].set_volume(0.6)
-        self.sounds["enemy_attack"].set_volume(0.3)
-
-
-        self.sounds["bullet_time"].set_volume(0.8)
-
-    def play_sound(self, sound_name, **kwargs):
-        if sound_name in self.sounds:
-            self.sounds[sound_name].play(**kwargs)
-            return self.sounds[sound_name]
-        return None
-
-    def stop_all_sounds(self):
-        for sound in self.sounds.values():
-            sound.stop()
-
-    def stop_sound(self, sound_name):
-        if sound_name in self.sounds:
-            self.sounds[sound_name].stop()
-
-    def load_images(self):
-        self.images[BACKGROUND] = {
-            "default":[
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/black.png").convert_alpha(),
-                (TILE_SIZE, TILE_SIZE)
-                )
-            ]
-        }
-        self.images[FLOOR] = {
-            "default":[
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/floor_light.png").convert_alpha(),
-                (TILE_SIZE, TILE_SIZE)
-                )
-            ]
-        }
-        self.images[WALL_CENTER] = {
-
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/wall_center.png").convert_alpha(),
-                (TILE_SIZE, TILE_SIZE)
-                )
-            ]
-        }
-
-        self.images["stalker"] = {
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/big_demon_idle_anim_f0.png").convert_alpha(),
-                (TILE_SIZE*4, TILE_SIZE*4)
-                )
-            ]
-        }
-
-        self.images["shooter"] = {
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/wizzard_m_idle_anim_f0.png").convert_alpha(),
-                (TILE_SIZE, TILE_SIZE*1.5)
-                )
-            ]
-        }
-
-        self.images["turret"] = {
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/necromancer_anim_f0.png").convert_alpha(),
-                (TILE_SIZE, TILE_SIZE * 1.5),
-                ),
-                pygame.transform.scale(
-                    pygame.image.load("../assets/img/necromancer_anim_f1.png").convert_alpha(),
-                    (TILE_SIZE, TILE_SIZE * 1.5),
-                ),
-                pygame.transform.scale(
-                    pygame.image.load("../assets/img/necromancer_anim_f2.png").convert_alpha(),
-                    (TILE_SIZE, TILE_SIZE * 1.5),
-                ),
-                pygame.transform.scale(
-                    pygame.image.load("../assets/img/necromancer_anim_f3.png").convert_alpha(),
-                    (TILE_SIZE, TILE_SIZE * 1.5),
-                ),
-            ]
-
-        }
-
-        self.images["projectile"] = {
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/monster_elemental_fire.png").convert_alpha(),
-                (TILE_SIZE // 2, TILE_SIZE // 2)
-                )
-            ]
-        }
-
-        self.images["player"] = {
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/monster_necromancer.png").convert_alpha(),
-                (TILE_SIZE * 1.25, TILE_SIZE * 1.25)
-                ),
-                pygame.transform.flip(
-                    pygame.transform.scale(
-                    pygame.image.load("../assets/img/monster_necromancer.png").convert_alpha(),
-                    (TILE_SIZE * 1.25, TILE_SIZE * 1.25)
-                    ),
-                    True,
-                    False
-                )
-            ]
-        }
-
-        self.images["heart"] = {
-            "default": [
-                pygame.transform.scale(
-                pygame.image.load("../assets/img/heart.png").convert_alpha(),
-                (40, 40)
-                )
-            ]
-        }
 
     def create_initial_map(self):
         self.create_map(seed=123)
@@ -221,9 +92,9 @@ class Game:
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == FLOOR:
-                    Floor(self, col, row, self.images[tile]["default"][0])
+                    Floor(self, col, row, self.asset_manager.get_image(FLOOR))
                 elif tile == WALL_CENTER:
-                    Wall(self, col, row, self.images[tile]["default"][0])
+                    Wall(self, col, row, self.asset_manager.get_image(WALL_CENTER))
 
     def position_player_in_map(self):
         for room in self.room_objs:
@@ -241,7 +112,7 @@ class Game:
         self.add_stalker_to_room(self.room_objs[-1])
 
     def add_shooter_to_room(self, room):
-        num_shooters = max((room.width * room.height) // 250, 1)
+        num_shooters = max((room.width * room.height) // 250, 2)
         for _ in range(num_shooters):
             shooter_x = random.randint(room.x + 1, room.x + room.width - 2)
             shooter_y = random.randint(room.y + 1, room.y + room.height - 2)
@@ -257,7 +128,7 @@ class Game:
             self.enemy_group.add(stalker)
 
     def add_turret_to_room(self, room):
-        num_turrets = max((room.width * room.height) // 250, 1)
+        num_turrets = max((room.width * room.height) // 250, 2)
         for _ in range(num_turrets):
             turret_x = random.randint(room.x + 1, room.x + room.width - 2)
             turret_y = random.randint(room.y + 1, room.y + room.height - 2)
@@ -288,20 +159,37 @@ class Game:
         self.all_sprites_group.update()
         self.camera.update(self.player)
 
+        if self.damage_effect_active:
+            self.damage_effect_timer -= self.dt
+            if self.damage_effect_timer <= 0:
+                self.damage_effect_active = False
+
+
     def is_visible_on_screen(self, rect):
         return (
                 rect.right >= 0 and rect.left <= WINDOW_WIDTH and
                 rect.bottom >= 0 and rect.top <= WINDOW_HEIGHT
         )
 
-
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_sprites()
         self.draw_ui()
         self.draw_fps()
-        self.draw_bsp_chunks(self.root_room, color=(255, 0, 0))
+        #self.draw_bsp_chunks(self.root_room, color=(255, 0, 0))
+
+        if self.player.bullet_time_active:
+            pygame.draw.rect(self.screen, PURPLE, pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT), 5)
+
+        if self.damage_effect_active:
+            damage_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+            damage_surface.fill((255, 0, 0))
+            alpha = int((self.damage_effect_timer / self.damage_effect_duration) * 128)
+            damage_surface.set_alpha(alpha)
+            self.screen.blit(damage_surface, (0, 0))
+
         pygame.display.flip()
+
 
     def draw_ui(self):
         self.health_display.draw(self.screen)
@@ -366,9 +254,9 @@ class Game:
 
     def run_start_menu(self):
         waiting = True
-        self.stop_all_sounds()
-        self.play_sound("monolog")
-        self.play_sound("menu_music", loops=-1, maxtime=0, fade_ms=0)
+        self.sound_manager.stop()
+        self.sound_manager.play("monolog")
+        self.sound_manager.play("menu_music", loops=-1, maxtime=0, fade_ms=0)
 
         while waiting and not self.game_over:
             for event in pygame.event.get():
@@ -389,9 +277,9 @@ class Game:
 
     def run_game_loop(self):
         self.playing = True
-        self.stop_all_sounds()
-        self.play_sound("ingame_music", loops=-1, maxtime=0, fade_ms=0)
-        self.play_sound("ambient", loops=-1, maxtime=0, fade_ms=0)
+        self.sound_manager.stop()
+        self.sound_manager.play("ingame_music", loops=-1, maxtime=0, fade_ms=0)
+        self.sound_manager.play("ambient", loops=-1, maxtime=0, fade_ms=0)
 
         while self.playing and not self.game_over:
             for event in pygame.event.get():
@@ -411,6 +299,7 @@ class Game:
     def check_level_completion(self):
         if len(self.enemy_group) <= self.stalker_count:
             self.level += 1
+            self.player.heal(10)
             self.create_map(seed=random.randint(0, 999999999))
             self.position_player_in_map()
             self.place_enemies()
@@ -422,8 +311,9 @@ class Game:
 
     def run_game_over(self):
         waiting = True
-        self.stop_all_sounds()
-        self.play_sound("menu_music", loops=-1, maxtime=0, fade_ms=0)
+        self.sound_manager.stop()
+        self.sound_manager.play("menu_music", loops=-1, maxtime=0, fade_ms=0)
+
         while waiting and not self.game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -447,6 +337,9 @@ class Game:
                 pygame.display.flip()
                 self.clock.tick(FPS)
 
+    def start_damage_effect(self):
+        self.damage_effect_active = True
+        self.damage_effect_timer = self.damage_effect_duration
 
     def reset_game(self):
         self.level = 1

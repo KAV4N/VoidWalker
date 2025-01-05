@@ -1,7 +1,7 @@
 import pygame
 
 import pygame
-from src.config import WHITE, CYAN, ORANGE, GREEN
+from src.config import WHITE, PURPLE, ORANGE, GREEN
 
 
 
@@ -17,7 +17,7 @@ class BulletTimeDisplay:
     def draw(self, screen):
         if self.player.bullet_time_active:
             text = f"BULLET TIME: {self.player.bullet_time_timer:.1f}"
-            color = CYAN
+            color = PURPLE
         elif self.player.bullet_time_cooldown_timer > 0:
             text = f"BULLET TIME COOLDOWN: {self.player.bullet_time_cooldown_timer:.1f}"
             color = ORANGE

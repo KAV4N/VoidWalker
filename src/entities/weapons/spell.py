@@ -14,7 +14,7 @@ class Spell:
         self.particle_count = 12
         self.particle_speed = 200
         self.particle_size = TILE_SIZE // 4
-        self.particle_color = (138, 43, 226)
+        self.particle_color = PURPLE
         self.glow_radius = TILE_SIZE * 2
 
         self.attack_rect = pygame.Rect(0, 0, TILE_SIZE * 1.5, TILE_SIZE)
@@ -82,7 +82,7 @@ class Spell:
 
     def start_attack(self):
         if self.recharge_timer >= self.recharge_time:
-            self.game.play_sound("attack")
+            self.game.sound_manager.play("attack")
             self.damaged_enemies.clear()
             self.check_hits()
             self.create_particles()

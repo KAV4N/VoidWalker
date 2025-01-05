@@ -5,7 +5,7 @@ import math
 class Shooter(Stalker):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
-        self.image = self.game.images["shooter"]["default"][0]
+        self.image = self.game.asset_manager.get_image("shooter")
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -15,7 +15,7 @@ class Shooter(Stalker):
         self.detection_radius = 300
 
         self.shoot_range = 75
-        self.shoot_cooldown = 1.75
+        self.shoot_cooldown = 5.0
         self.shoot_timer = 0
 
         self.path_recalc_cooldown = 3.5
@@ -63,7 +63,7 @@ class Shooter(Stalker):
         if length > 0:
             dx = dx / length
             dy = dy / length
-        self.game.play_sound("enemy_attack")
+        self.game.sound_manager.play("enemy_attack")
         Projectile(
             self.game,
             self.rect.centerx,

@@ -5,8 +5,8 @@ class HealthDisplay:
     def __init__(self, player, heart_image):
         self.player = player
         self.heart_image = heart_image
-        self.heart_width = heart_image.get_width()  # Use the image width
-        self.heart_spacing = 5  # Space between hearts
+        self.heart_width = heart_image.get_width()
+        self.heart_spacing = 5
 
     def draw(self, surface):
         for i in range(self.player.hp):

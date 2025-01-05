@@ -7,17 +7,17 @@ from src.entities.base_sprite import BaseSprite
 
 class Turret(BaseSprite):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, game.images["turret"]["default"][0])
+        super().__init__(game, x, y, game.asset_manager.get_image("turret"))
 
         self.hp = 1
         self.z = 1
 
-        self.animation_frames = game.images["turret"]["default"]
+        self.animation_frames = game.asset_manager.get_frames("turret")
         self.current_frame = 0
         self.animation_time = 0
         self.animation_delay = 0.2
 
-        self.shoot_delay = 0.35
+        self.shoot_delay = 0.5
         self.shoot_timer = 0
         self.detection_radius = 200
 
@@ -79,5 +79,5 @@ class Turret(BaseSprite):
         if distance > 0:
             dx = dx / distance
             dy = dy / distance
-            self.game.play_sound("enemy_attack")
+            self.game.sound_manager.play("enemy_attack")
             Projectile(self.game, self.rect.centerx, self.rect.centery, dx, dy)

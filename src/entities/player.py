@@ -5,26 +5,33 @@ from src.entities.base_sprite import BaseSprite
 
 class Player(BaseSprite):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, game.images["player"]["default"][0])
+        super().__init__(game, x, y, game.asset_manager.get_image("player"))
         self.vx = 0
         self.vy = 0
-        self.speed = 300
+        self.speed = 275
 
         self.bullet_time_active = False
         self.bullet_time_duration = 10.0
         self.bullet_time_timer = 0
-        self.bullet_time_cooldown = 10.0
+        self.bullet_time_cooldown = 5.0
         self.bullet_time_cooldown_timer = 0
 
         self.weapon = Spell(self)
-        self.hp = 100
-        self.z = 1
+        self.max_hp = 30
+        self.hp = self.max_hp
+        self.z = 2
+
+    def heal(self, hp):
+        if hp+self.hp > self.max_hp:
+            self.hp = self.max_hp
+        else:
+            self.hp += hp
 
     def flip_image(self):
         if self.vx > 0:
-            self.image = self.game.images["player"]["default"][1]
+            self.image = self.game.asset_manager.get_image("player", "default", 1)
         elif self.vx < 0:
-            self.image = self.game.images["player"]["default"][0]
+            self.image = self.game.asset_manager.get_image("player", "default", 0)
 
     def check_collision(self):
         tile_x1 = self.rect.left // TILE_SIZE
@@ -102,7 +109,7 @@ class Player(BaseSprite):
 
         if keys[pygame.K_LSHIFT] and self.bullet_time_cooldown_timer <= 0 and not self.bullet_time_active:
             self.bullet_time_active = True
-            self.game.play_sound("bullet_time")
+            self.game.sound_manager.play("bullet_time")
             self.bullet_time_timer = self.bullet_time_duration
 
         if self.bullet_time_active:
@@ -115,7 +122,9 @@ class Player(BaseSprite):
             self.bullet_time_cooldown_timer -= self.game.dt
 
     def handle_damage(self, damage):
+        self.game.sound_manager.play("player_hit")
         self.hp -= damage
+        self.game.start_damage_effect()
         if self.hp <= 0:
             self.kill()
 
