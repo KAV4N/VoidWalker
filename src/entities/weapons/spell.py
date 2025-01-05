@@ -24,8 +24,6 @@ class Spell:
         self.recharge_time = 0.35
         self.recharge_timer = 0
 
-        self.damaged_enemies = set()
-
     def create_particles(self):
         for i in range(self.particle_count):
             angle = (2 * math.pi * i) / self.particle_count
@@ -86,7 +84,6 @@ class Spell:
     def start_attack(self):
         if self.recharge_timer >= self.recharge_time:
             self.game.sound_manager.play("attack")
-            self.damaged_enemies.clear()
             self.check_hits()
             self.create_particles()
             self.recharge_timer = 0
@@ -103,6 +100,6 @@ class Spell:
             dy = enemy.rect.centery - center_y
             distance = math.sqrt(dx * dx + dy * dy)
 
-            if distance <= self.attack_radius and enemy not in self.damaged_enemies:
+            if distance <= self.attack_radius and enemy:
                 enemy.take_damage(self.damage)
-                self.damaged_enemies.add(enemy)
+
