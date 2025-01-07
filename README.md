@@ -67,7 +67,7 @@ Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s čas
 - **Variabilní nepriatelia**:
 <br>
 <br>
-- 
+
 **Stalker**: prenasleduje hráča a útočí zblízka
 - životy: nesmrtelný
 - poškodenie: 5
