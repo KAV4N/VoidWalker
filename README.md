@@ -17,6 +17,11 @@ Ghostrunner je akčná hra zameraná na rýchly pohyb a precízne súboje, kde j
 - Rýchly a plynulý pohyb
 - Bullet time mechaniku pre strategické rozhodovanie
 - Dôraz na vyhýbanie sa nepriateľským útokom
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/ghostrunner.jpg" alt="Ghostrunner">
+  <br>
+  <em>Obrázok  1 Ukážka hry Ghostrunner</em>
+</p>
 
 <ins>**Soul Knight**</ins>
 
@@ -24,6 +29,12 @@ Soul Knight je roguelike strieľačka z pohľadu zhora, ktorá ponúka procedur�
 - Procedurálne generované dungeony
 - Systém rôznych nepriateľov s unikátnymi vzorcami útoku
 - Progresiu cez jednotlivé úrovne
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/soulknight.jpg" alt="Soul Knight">
+  <br>
+  <em>Obrázok 2 Ukážka hry Soul Knight</em>
+</p>
+
 
 ### **1.2 Herný zážitok**
 Cieľom hry je, aby hráč prežil a postupoval cez generované dungeony, pričom musí čeliť rôznym typom nepriateľov. Kľúčovými prvkami sú:
@@ -42,15 +53,52 @@ Cieľom hry je, aby hráč prežil a postupoval cez generované dungeony, pričo
 ### **2.1 Prehľad hry**
 Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s časom. Postupuje cez procedurálne generované dungeony, bojuje s nepriateľmi a snaží sa dostať čo najhlbšie do podzemia.
 
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/f5c20e67b09e3db9c9e74df2408622fb7a37654e/media/gameplay_example.gif" alt="VoidWalker">
+  <br>
+  <em>Obrázok 3 Ukážka hry VoidWalker</em>
+</p>
+
 ### **2.2 Základné mechaniky**
 - **Bullet Time**: spomalenie času pre strategické rozhodovanie
 - **Magický útok**: kruhový útok poškodzujúci okolných nepriateľov
 - **Procedurálna generácia**: každý level je unikátny vďaka BSP algoritmu
 - **A\* pathfinding**: implementácia hľadania najkratšej cesty pre nepriateľov
 - **Variabilní nepriatelia**:
-  - Stalker: prenasleduje hráča a útočí zblízka
-  - Wizard: útočí na diaľku magickými projektilmi
-  - Sharpshooter: strieľa presné projektily z väčšej vzdialenosti
+<br>
+<br>
+**Stalker**: prenasleduje hráča a útočí zblízka
+- životy: nesmrtelný
+- poškodenie: 5
+- útok: každú sekundu
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/stalker.png" alt="Stalker">
+  <br>
+  <em>Obrázok 4 Stalker</em>
+</p>
+<br>
+
+**Wizard**: útočí na diaľku magickými projektilmi, ktoré hádže veľkou rýchlosťou na hráča
+- životy: 1
+- poškodenie: 1 (zásah projektilu)
+- útok: každú 0.5 sekundu
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/wizard.png" alt="Wizard">
+  <br>
+  <em>Obrázok 5 Wizard</em>
+</p>
+<br>
+
+**Sharpshooter**: jeho rýchlosť streľby je pomalá, ale strieľa presné a rýchle projektily z väčšej vzdialenosti
+- životy: 1
+- poškodenie: 1 (zásah projektilu)
+- útok: každých 5.0 sekúnd
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/sharpshooter.png" alt="Sharpshooter">
+  <br>
+  <em>Obrázok 6 Sharpshooter</em>
+</p>
+
 
 ### **2.3 Návrh tried**
 - **Game**: hlavná herná logika a správa herných stavov
@@ -86,7 +134,7 @@ Hra využíva minimalistický pixel art štýl s dôrazom na čitateľnosť:
 
 ### **4.2 Zvukové efekty**
 - Zvuky útokov a zbraní
-- Ambiente zvuky dungeonov
+- Ambientné zvuky dungeonov
 - Zvukové signály pre bullet time
 - Zvuky zranenia a smrti
 
