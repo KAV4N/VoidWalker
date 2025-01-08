@@ -62,10 +62,11 @@ class Game:
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.font = pygame.font.SysFont(None, 30)
-        pygame.display.set_caption("Tilemap Game")
+        pygame.display.set_caption("VoidWalker")
         self.clock = pygame.time.Clock()
         self.title_font = pygame.font.SysFont(None, 64)
         self.menu_font = pygame.font.SysFont(None, 36)
+        self.controls_font = pygame.font.SysFont(None, 24)
 
     def create_initial_map(self):
         self.create_map(seed=123)
@@ -176,7 +177,9 @@ class Game:
         self.draw_sprites()
         self.draw_ui()
         self.draw_fps()
-        #self.draw_bsp_chunks(self.root_room, color=(255, 0, 0))
+        if DEBUG_MODE:
+            self.draw_bsp_chunks(self.root_room, color=(255, 0, 0))
+            self.draw_a_star_pathfinding_stalker()
 
         if self.player.bullet_time_active:
             pygame.draw.rect(self.screen, PURPLE, pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT), 5)
@@ -220,6 +223,11 @@ class Game:
         fps_text = self.font.render(f"FPS: {int(self.clock.get_fps())}", True, WHITE)
         self.screen.blit(fps_text, (10, 10))
 
+    def draw_a_star_pathfinding_stalker(self):
+        for sprite in self.enemy_group:
+            if isinstance(sprite, Stalker):
+                sprite.draw_pathfinding(self.screen, self.camera)
+
     def draw_bsp_chunks(self, node, color=(0, 255, 0), level=0, max_level=None):
         if not node or (max_level is not None and level > max_level):
             return
@@ -228,10 +236,9 @@ class Game:
         self.draw_bsp_chunks(node.right_child, color, level + 1, max_level)
 
     def draw_node_rect(self, node, color, level):
-        rect_color = [c // (level + 1) for c in color]
         pygame.draw.rect(
             self.screen,
-            rect_color,
+            color,
             pygame.Rect(
                 node.x * TILE_SIZE - self.camera.x * self.camera.zoom + WINDOW_WIDTH // 2,
                 node.y * TILE_SIZE - self.camera.y * self.camera.zoom + WINDOW_HEIGHT // 2,
@@ -268,10 +275,27 @@ class Game:
                         self.state = "PLAYING"
 
             self.screen.fill(BACKGROUND_COLOR)
+
             title = self.title_font.render("VOIDWALKER", True, WHITE)
             start = self.menu_font.render("Press ENTER to Start", True, WHITE)
             self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 3))
             self.screen.blit(start, (WINDOW_WIDTH // 2 - start.get_width() // 2, WINDOW_HEIGHT // 2))
+
+            controls = [
+                "WASD/ARROWS: MOVE",
+                "SPACE: CAST SPELL",
+                "LSHIFT: BULLET TIME",
+                "MOUSE WHEEL: ZOOM IN/OUT"
+            ]
+
+            for i, control in enumerate(controls):
+                control_text = self.controls_font.render(control, True, WHITE)
+                self.screen.blit(
+                    control_text,
+                    (WINDOW_WIDTH // 2 - control_text.get_width() // 2,
+                     WINDOW_HEIGHT // 2 + 50 + i * 25)
+                )
+
             pygame.display.flip()
             self.clock.tick(FPS)
 
@@ -286,8 +310,8 @@ class Game:
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.game_over = True
                     self.playing = False
-                # elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                #     self.create_map(seed=random.randint(0, 999999999))
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and DEBUG_MODE:
+                    self.create_map(seed=random.randint(0, 999999999))
                 elif event.type == pygame.MOUSEWHEEL:
                     self.camera.adjust_zoom(event.y * 0.5)
             self.dt = self.clock.tick(FPS) / 1000
