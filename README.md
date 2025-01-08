@@ -68,6 +68,7 @@ Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s čas
   <br>
   <em>Obrázok 4 Ukážka BSP algoritmu</em>
 </p>
+
 - **A\* pathfinding**: implementácia hľadania najkratšej cesty pre nepriateľov
 <p align="center">
   <img src="https://github.com/KAV4N/VoidWalker/blob/20231992c69950a9167f07cfb05593edd91554de/media/a_star.png" alt="a_star">
