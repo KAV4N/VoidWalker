@@ -63,7 +63,18 @@ Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s čas
 - **Bullet Time**: spomalenie času pre strategické rozhodovanie
 - **Magický útok**: kruhový útok poškodzujúci okolných nepriateľov
 - **Procedurálna generácia**: každý level je unikátny vďaka BSP algoritmu
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/20231992c69950a9167f07cfb05593edd91554de/media/basp.png" alt="bsp">
+  <br>
+  <em>Obrázok 4 Ukážka BSP algoritmu</em>
+</p>
 - **A\* pathfinding**: implementácia hľadania najkratšej cesty pre nepriateľov
+<p align="center">
+  <img src="https://github.com/KAV4N/VoidWalker/blob/20231992c69950a9167f07cfb05593edd91554de/media/a_star.png" alt="a_star">
+  <br>
+  <em>Obrázok 5 Ukážka A* algoritmu</em>
+</p>
+
 - **Variabilní nepriatelia**:
 <br>
 <br>
@@ -75,7 +86,7 @@ Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s čas
 <p align="center">
   <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/stalker.png" alt="Stalker">
   <br>
-  <em>Obrázok 4 Stalker</em>
+  <em>Obrázok 6 Stalker</em>
 </p>
 <br>
 
@@ -86,7 +97,7 @@ Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s čas
 <p align="center">
   <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/wizard.png" alt="Wizard">
   <br>
-  <em>Obrázok 5 Wizard</em>
+  <em>Obrázok 7 Wizard</em>
 </p>
 <br>
 
@@ -97,7 +108,7 @@ Hráč ovláda Voidwalkera, mystickú bytosť s schopnosťou manipulovať s čas
 <p align="center">
   <img src="https://github.com/KAV4N/VoidWalker/blob/76118d7bb1e989a11daccd0d86e987d268e77ae4/media/sharpshooter.png" alt="Sharpshooter">
   <br>
-  <em>Obrázok 6 Sharpshooter</em>
+  <em>Obrázok 8 Sharpshooter</em>
 </p>
 
 
