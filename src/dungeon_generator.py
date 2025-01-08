@@ -84,15 +84,17 @@ class DungeonGenerator:
         return self.tilemap, self.rooms, self.root, self.seed
 
     def _apply_rooms(self):
-        def apply_rooms(node):
-            if node.room:
-                node.room.apply_to_map(self.tilemap)
-            if node.left_child:
-                apply_rooms(node.left_child)
-            if node.right_child:
-                apply_rooms(node.right_child)
+        self.apply_rooms_to_map(self.root)
 
-        apply_rooms(self.root)
+    def apply_rooms_to_map(self, node):
+        if node is None:
+            return
+        if node.room:
+            node.room.apply_to_map(self.tilemap)
+        if node.left_child:
+            self.apply_rooms_to_map(node.left_child)
+        if node.right_child:
+            self.apply_rooms_to_map(node.right_child)
 
     def _connect_rooms(self):
         self._connect_nodes(self.root)
